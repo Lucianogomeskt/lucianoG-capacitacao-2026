@@ -1,0 +1,20 @@
+#spring.application.name=jp-capacitacao-2026
+#spring.jpa.hibernate.ddl-auto=update
+spring:
+  application:
+    name: jp-capacitacao-2026
+
+  jpa:
+    database-platform: org.hibernate.dialect.OracleDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  datasource:
+    url: ${URL_DB:jdbc:oracle:thin:@localhost:1521:xe}
+    username: ${USERNAME_DB:admin}
+    password: ${PASSWORD_DB:admin}
+    driverClassName: oracle.jdbc.driver.OracleDriver
+
+server:
+  port: 8080
