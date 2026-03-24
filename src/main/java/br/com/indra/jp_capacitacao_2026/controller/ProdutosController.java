@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +42,7 @@ public class ProdutosController {
     @Operation(description = "Endpoint para criar um novo produto",
             summary = "Criação de produto")
     @PostMapping("/cria")
-    public ResponseEntity<Produtos> criarProduto(@RequestBody Produtos produto){
+    public ResponseEntity<Produtos> criarProduto(@Valid @RequestBody Produtos produto){
         return ResponseEntity.ok(produtosService.createdProduto(produto));
     }
 

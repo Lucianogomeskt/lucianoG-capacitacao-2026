@@ -1,13 +1,8 @@
 package br.com.indra.jp_capacitacao_2026.model;
 
 import jakarta.annotation.Nullable;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -35,10 +30,17 @@ public class Produtos {
 
     private String descricao;
 
-    @Column(nullable = false)
+    /// TESTAR VALIDAÇÃO DE PREÇO
+    @NotNull(message = "O preço é obrigatório")
+    @DecimalMin(value = "0.01", message = "O preço não pode ser inferior a um centavo")
     private BigDecimal preco;
 
     @Column(name="codigo_barras")
     private String codigoBarras;
+
+    /// TESTAR CAMPO MUITOS PRA UM
+    @ManyToOne
+    @JoinColumn(name = "category_id", nullable = false)
+    private Category category;
 
 }
