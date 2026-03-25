@@ -1,12 +1,18 @@
 package br.com.indra.jp_capacitacao_2026.controller;
 
-import br.com.indra.jp_capacitacao_2026.model.Categoria;
-import br.com.indra.jp_capacitacao_2026.service.CategoriaService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+
+import br.com.indra.jp_capacitacao_2026.service.CategoriaService;
+import br.com.indra.jp_capacitacao_2026.service.dto.CategoriaRequestDTO;
+import br.com.indra.jp_capacitacao_2026.service.dto.CategoriaResponseDTO;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/categorias")
@@ -15,14 +21,14 @@ public class CategoriaController {
 
     private final CategoriaService categoriaService;
 
-    @PostMapping
-    public ResponseEntity<Categoria> criar(@RequestBody Categoria categoria) {
-        Categoria novaCategoria = categoriaService.salvar(categoria);
-        return ResponseEntity.ok(novaCategoria);
+
+    @PostMapping("/cadastrar")
+    public ResponseEntity<CategoriaResponseDTO> cadastrarCategoria(@Valid @RequestBody CategoriaRequestDTO dto) {
+        CategoriaResponseDTO response = categoriaService.cadastrarCategoria(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping
-    public ResponseEntity<List<Categoria>> listarTodas() {
-        return ResponseEntity.ok(categoriaService.listarTodas());
-    }
+
+
+
 }
