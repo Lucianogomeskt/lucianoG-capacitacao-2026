@@ -1,5 +1,6 @@
 package br.com.indra.jp_capacitacao_2026.service;
 
+import br.com.indra.jp_capacitacao_2026.exception.EntidadeConflitoException;
 import br.com.indra.jp_capacitacao_2026.model.Categoria;
 import br.com.indra.jp_capacitacao_2026.repository.CategoriaRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ public class CategoriaService {
 
     public Categoria salvar(Categoria categoria) {
         if (categoriaRepository.existsByName(categoria.getName())) {
-            throw new RuntimeException("A categoria '" + categoria.getName() + "' já existe.");
+            throw new EntidadeConflitoException("A categoria '" + categoria.getName() + "' já existe.");
         }
         return categoriaRepository.save(categoria);
     }
