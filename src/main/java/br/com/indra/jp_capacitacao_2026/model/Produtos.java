@@ -1,10 +1,7 @@
 package br.com.indra.jp_capacitacao_2026.model;
 
-import jakarta.annotation.Nullable;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,6 +38,6 @@ public class Produtos {
     /// TESTAR CAMPO MUITOS PRA UM
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
-    private Category category;
+    private Categoria category;
 
 }
