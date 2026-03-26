@@ -5,6 +5,7 @@ import br.com.indra.jp_capacitacao_2026.model.HistoricoPreco;
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
 import br.com.indra.jp_capacitacao_2026.repository.CategoriaRepository;
 import br.com.indra.jp_capacitacao_2026.repository.HistoricoPrecoRepository;
+import br.com.indra.jp_capacitacao_2026.repository.MovimentacaoEstoqueRepository;
 import br.com.indra.jp_capacitacao_2026.repository.ProdutosRepository;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoRequestDTO;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoResponseDTO;
@@ -24,6 +25,7 @@ public class ProdutosService {
     private final ProdutosRepository produtosRepository;
     private final HistoricoPrecoRepository historicoPrecoRepository;
     private final CategoriaRepository categoriaRepository;
+    private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
 
     @Transactional
     public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO dto) {
