@@ -63,7 +63,6 @@ public class ProdutosController {
         return ResponseEntity.ok(produtosService.getById(id));
     }
 
-    //U
     @PutMapping("/atualiza")
     public ResponseEntity<Produtos> atualizarProduto(@RequestParam Long id,
                                                      @RequestBody Produtos produto){
@@ -77,7 +76,7 @@ public class ProdutosController {
     }
 
     //Mudar para delete lógico
-    @DeleteMapping("/deleta/{id}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deletarProduto(@PathVariable Long id) {
         produtosService.deletarProduto(id);
         return ResponseEntity.noContent().build();

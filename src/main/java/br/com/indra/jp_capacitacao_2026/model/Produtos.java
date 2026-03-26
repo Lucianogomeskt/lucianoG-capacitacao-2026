@@ -3,10 +3,7 @@ package br.com.indra.jp_capacitacao_2026.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
@@ -15,6 +12,7 @@ import java.math.BigDecimal;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Table(name = "produtos")
 public class Produtos {
 
@@ -27,7 +25,6 @@ public class Produtos {
 
     private String descricao;
 
-    /// TESTAR VALIDAÇÃO DE PREÇO
     @NotNull(message = "O preço é obrigatório")
     @DecimalMin(value = "0.01", message = "O preço não pode ser inferior a um centavo")
     private BigDecimal preco;
@@ -35,9 +32,11 @@ public class Produtos {
     @Column(name="codigo_barras")
     private String codigoBarras;
 
-    /// TESTAR CAMPO MUITOS PRA UM
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Categoria category;
+
+    @Column(nullable = false)
+    private Boolean ativo = true;
 
 }

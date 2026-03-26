@@ -1,9 +1,12 @@
 package br.com.indra.jp_capacitacao_2026.service;
 
+import br.com.indra.jp_capacitacao_2026.model.Categoria;
 import br.com.indra.jp_capacitacao_2026.model.HistoricoPreco;
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
 import br.com.indra.jp_capacitacao_2026.repository.HistoricoPrecoRepository;
 import br.com.indra.jp_capacitacao_2026.repository.ProdutosRepository;
+import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoRequestDTO;
+import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoResponseDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -44,22 +47,7 @@ public class ProdutosService {
         final var produto = produtosRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
         produto.setPreco(preco);
-        /***
-         * Rastreabilidade
-         * 1 - Criar um log
-         * 2 - Adicionar em tabela historico de preços valores old e new
-         * para cada produto atualizado
-         * 3 - Antes de atualizar a tabela de produto, pegar o valor atual da tabela e adiconar
-         * na tabela historico
-         * 4 - Pegar novo valor da tabela e adicionar na tabela historico
-         * 5 - Sempre na tabela, adicionar novo registro após atualizar tabela de produto
-         * Estrutura da tabela historico de preços
-         * id
-         * id_produto
-         * preco_antigo
-         * preco_novo
-         * data_alteracao
-         */
+
         final var historico = new HistoricoPreco();
         historico.setPrecoAntigo(produto.getPreco());
         historico.setProdutos(produto);
@@ -77,5 +65,43 @@ public class ProdutosService {
          * get na tabela produtos para novo preço
          */
 //        return produto;
+
     }
+        private Produtos converterParaEntidade(ProdutoRequestDTO dto, Categoria categoria) {
+            Produtos produto = new Produtos();
+            produto.setNome(dto.nome());
+            produto.setDescricao(dto.descricao());
+            produto.setPreco(dto.preco());
+            produto.setCodigoBarras(dto.codigoBarras());
+            produto.setCategory(categoria);
+            produto.setAtivo(true);
+            return produto;
+        }
+
+        private ProdutoResponseDTO converterParaDTO(Produtos produto) {
+            return new ProdutoResponseDTO(
+                    produto.getId(),
+                    produto.getNome(),
+                    produto.getDescricao(),
+                    produto.getPreco(),
+                    produto.getCodigoBarras(),
+                    produto.getCategory().getName()
+            );
+        }
 }
+/***
+ * Rastreabilidade
+ * 1 - Criar um log
+ * 2 - Adicionar em tabela historico de preços valores old e new
+ * para cada produto atualizado
+ * 3 - Antes de atualizar a tabela de produto, pegar o valor atual da tabela e adiconar
+ * na tabela historico
+ * 4 - Pegar novo valor da tabela e adicionar na tabela historico
+ * 5 - Sempre na tabela, adicionar novo registro após atualizar tabela de produto
+ * Estrutura da tabela historico de preços
+ * id
+ * id_produto
+ * preco_antigo
+ * preco_novo
+ * data_alteracao
+ */
