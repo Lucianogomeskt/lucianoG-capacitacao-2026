@@ -3,6 +3,8 @@ package br.com.indra.jp_capacitacao_2026.controller;
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
 import br.com.indra.jp_capacitacao_2026.repository.ProdutosRepository;
 import br.com.indra.jp_capacitacao_2026.service.ProdutosService;
+import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoRequestDTO;
+import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -10,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,15 +35,19 @@ public class ProdutosController {
 
     private final ProdutosService produtosService;
 
-    /**
-     * Recomendação de desenvolvimento, ampliar responses(responseEntity)
-     * possíveis além do ok.
-     */
-    @Operation(description = "Endpoint para criar um novo produto",
-            summary = "Criação de produto")
-    @PostMapping("/cria")
-    public ResponseEntity<Produtos> criarProduto(@Valid @RequestBody Produtos produto){
-        return ResponseEntity.ok(produtosService.createdProduto(produto));
+    @Operation(
+            summary = "Cadastra um novo produto",
+            description = "Cria um produto no banco Oracle associado a uma categoria. A categoria deve estar ativa."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Produto cadastrado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados de requisição inválidos (validação de campos)"),
+            @ApiResponse(responseCode = "404", description = "Categoria não encontrada ou está inativa no sistema"),
+            @ApiResponse(responseCode = "500", description = "Erro interno ao processar a operação no banco")
+    })
+    @PostMapping("/cadastrar")
+    public ResponseEntity<ProdutoResponseDTO> cadastrarProduto(@Valid @RequestBody ProdutoRequestDTO dto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(produtosService.cadastrarProduto(dto));
     }
 
     /**

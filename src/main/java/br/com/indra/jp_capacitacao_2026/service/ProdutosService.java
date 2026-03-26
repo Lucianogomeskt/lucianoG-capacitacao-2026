@@ -3,10 +3,12 @@ package br.com.indra.jp_capacitacao_2026.service;
 import br.com.indra.jp_capacitacao_2026.model.Categoria;
 import br.com.indra.jp_capacitacao_2026.model.HistoricoPreco;
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
+import br.com.indra.jp_capacitacao_2026.repository.CategoriaRepository;
 import br.com.indra.jp_capacitacao_2026.repository.HistoricoPrecoRepository;
 import br.com.indra.jp_capacitacao_2026.repository.ProdutosRepository;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoRequestDTO;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoResponseDTO;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,13 +23,21 @@ public class ProdutosService {
 
     private final ProdutosRepository produtosRepository;
     private final HistoricoPrecoRepository historicoPrecoRepository;
+    private final CategoriaRepository categoriaRepository;
 
-    public List<Produtos> getAll() {
-        return produtosRepository.findAll();
+    @Transactional
+    public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO dto) {
+        Categoria categoria = categoriaRepository.findByIdAndAtivoTrue(dto.categoriaId())
+                .orElseThrow(() -> new RuntimeException("Não é possível cadastrar: Categoria inexistente ou inativa."));
+        Produtos produto = converterParaEntidade(dto, categoria);
+        Produtos produtoSalvo = produtosRepository.save(produto);
+
+        return converterParaDTO(produtoSalvo);
     }
 
-    public Produtos createdProduto(Produtos produto) {
-        return produtosRepository.save(produto);
+    public List<Produtos> getAll() { return produtosRepository.findAll();}
+    public Produtos getById(Long id) {
+        return produtosRepository.findById(id).get();
     }
 
     public Produtos atualiza(Produtos produto) {
@@ -38,9 +48,7 @@ public class ProdutosService {
         produtosRepository.deleteById(id);
     }
 
-    public Produtos getById(Long id) {
-        return produtosRepository.findById(id).get();
-    }
+
 
     public Produtos atualizaPreco(Long id, BigDecimal preco) {
 //        Produtos produto = produtosRepository.findById(id).get();
