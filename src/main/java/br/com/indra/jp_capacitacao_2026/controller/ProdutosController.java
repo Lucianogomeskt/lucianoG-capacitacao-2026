@@ -50,27 +50,36 @@ public class ProdutosController {
         return ResponseEntity.status(HttpStatus.CREATED).body(produtosService.cadastrarProduto(dto));
     }
 
-    /**
-     * GET
-     * localhost:9090/produtos
-     * @return
-     */
-    @GetMapping
-    public ResponseEntity<List<Produtos>> getAll(){
-        return ResponseEntity.ok(produtosService.getAll());
-    }
+        @Operation(
+                summary = "Lista todos os produtos ativos",
+                description = "Retorna uma lista de todos os produtos que possuem status ativo no banco Oracle."
+        )
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "Lista recuperada com sucesso"),
+                @ApiResponse(responseCode = "500", description = "Erro interno ao processar a consulta")
+        })
+        @GetMapping
+        public ResponseEntity<List<ProdutoResponseDTO>> listarTodos() {
+            return ResponseEntity.ok(produtosService.getAll());
+        }
 
-    /**
-     * GET
-     * localhost:9090/produtos/1
-     * @return
-     */
-    @GetMapping("/{id}")
-    public ResponseEntity<Produtos> getById(@PathVariable Long id){
-        return ResponseEntity.ok(produtosService.getById(id));
-    }
+        @Operation(
+                summary = "Busca um produto por ID",
+                description = "Retorna os detalhes de um produto específico, desde que ele esteja ativo."
+        )
+        @ApiResponses(value = {
+                @ApiResponse(responseCode = "200", description = "Produto encontrado com sucesso"),
+                @ApiResponse(responseCode = "404", description = "Produto não encontrado ou inativo no sistema"),
+                @ApiResponse(responseCode = "500", description = "Erro interno ao buscar o produto")
+        })
+        @GetMapping("/{id}")
+        public ResponseEntity<ProdutoResponseDTO> buscarPorId(@PathVariable Long id) {
+            return ResponseEntity.ok(produtosService.getById(id));
+        }
 
-    @PutMapping("/atualiza")
+
+
+        @PutMapping("/atualiza")
     public ResponseEntity<Produtos> atualizarProduto(@RequestParam Long id,
                                                      @RequestBody Produtos produto){
         return ResponseEntity.ok(produtosService.atualiza(produto));

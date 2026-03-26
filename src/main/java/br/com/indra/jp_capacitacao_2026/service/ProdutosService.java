@@ -35,9 +35,17 @@ public class ProdutosService {
         return converterParaDTO(produtoSalvo);
     }
 
-    public List<Produtos> getAll() { return produtosRepository.findAll();}
-    public Produtos getById(Long id) {
-        return produtosRepository.findById(id).get();
+    public List<ProdutoResponseDTO> getAll() {
+        return produtosRepository.findAllByAtivoTrue()
+                .stream()
+                .map(this::converterParaDTO)
+                .toList();
+    }
+
+    public ProdutoResponseDTO getById(Long id) {
+        return produtosRepository.findByIdAndAtivoTrue(id)
+                .map(this::converterParaDTO)
+                .orElseThrow(() -> new RuntimeException("Produto não encontrado ou inativo"));
     }
 
     public Produtos atualiza(Produtos produto) {
