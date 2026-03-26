@@ -1,6 +1,7 @@
 package br.com.indra.jp_capacitacao_2026.service;
 
 
+import br.com.indra.jp_capacitacao_2026.exception.CategoriaNotFoundException;
 import br.com.indra.jp_capacitacao_2026.exception.EntidadeConflitoException;
 import br.com.indra.jp_capacitacao_2026.model.Categoria;
 import br.com.indra.jp_capacitacao_2026.repository.CategoriaRepository;
@@ -9,6 +10,8 @@ import br.com.indra.jp_capacitacao_2026.service.dto.CategoriaResponseDTO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,19 @@ public class CategoriaService {
         Categoria salva = categoriaRepository.save(categoria);
 
         return converterParaDTO(salva);
+    }
+
+    public List<CategoriaResponseDTO> findAll() {
+        return categoriaRepository.findAll()
+                .stream()
+                .map(this::converterParaDTO)
+                .toList();
+    }
+
+    public CategoriaResponseDTO findById(Long id) {
+        return categoriaRepository.findById(id)
+                .map(this::converterParaDTO)
+                .orElseThrow(() -> new CategoriaNotFoundException("ID " + id + " não encontrado no sistema"));
     }
 
     private Categoria converterParaEntidade(CategoriaRequestDTO dto) {

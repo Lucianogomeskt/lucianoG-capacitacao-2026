@@ -32,8 +32,6 @@ public class ProdutosController {
 
     private final ProdutosService produtosService;
 
-    //C
-
     /**
      * Recomendação de desenvolvimento, ampliar responses(responseEntity)
      * possíveis além do ok.
