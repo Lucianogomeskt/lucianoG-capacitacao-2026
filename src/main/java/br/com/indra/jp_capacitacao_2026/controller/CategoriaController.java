@@ -65,8 +65,18 @@ public class CategoriaController {
         return ResponseEntity.ok(dto);
     }
 
+    @Operation(summary = "Atualiza uma categoria", description = "Retorna 200 (OK) após atualizar ou 404 se o ID não existir")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Categoria atualizada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "ID não encontrado para atualização"),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<CategoriaResponseDTO> update(@PathVariable Long id, @Valid @RequestBody CategoriaRequestDTO dto) {
+        CategoriaResponseDTO response = categoriaService.atualizar(id, dto);
+        return ResponseEntity.ok(response);
 
-
+    }
 }
 
 

@@ -45,6 +45,21 @@ public class CategoriaService {
                 .orElseThrow(() -> new CategoriaNotFoundException("ID " + id + " não encontrado no sistema"));
     }
 
+    public CategoriaResponseDTO atualizar(Long id, CategoriaRequestDTO dto) {
+        Categoria categoriaExistente = categoriaRepository.findById(id)
+                .orElseThrow(() -> new CategoriaNotFoundException("Não é possível atualizar: ID " + id + " não encontrado"));
+        categoriaExistente.setName(dto.name());
+        Categoria atualizada = categoriaRepository.save(categoriaExistente);
+        return converterParaDTO(atualizada);
+    }
+
+
+
+
+
+
+
+
     private Categoria converterParaEntidade(CategoriaRequestDTO dto) {
         return Categoria.builder()
                 .name(dto.name())
