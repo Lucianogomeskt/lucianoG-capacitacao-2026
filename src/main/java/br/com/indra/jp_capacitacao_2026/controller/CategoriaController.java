@@ -77,6 +77,21 @@ public class CategoriaController {
         return ResponseEntity.ok(response);
 
     }
+
+    @Operation(summary = "Desativa uma categoria (Delete Lógico)", description = "Retorna 204 (No Content) após desativar ou 404 se o ID não existir")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Categoria desativada com sucesso"),
+            @ApiResponse(responseCode = "404", description = "ID não encontrado para exclusão"),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        categoriaService.deletarLogico(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
 }
+
 
 
