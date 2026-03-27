@@ -8,6 +8,9 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "tb_carrinho")
 @Getter
@@ -27,6 +30,8 @@ public class Carrinho {
     @Column(name = "status", nullable = false)
     private StatusCarrinho status;
 
+    @OneToMany(mappedBy = "carrinho", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CarrinhoItem> itens = new ArrayList<>();
 
 }
 

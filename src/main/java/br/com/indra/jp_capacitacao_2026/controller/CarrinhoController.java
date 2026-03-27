@@ -43,6 +43,18 @@ public class CarrinhoController {
         CarrinhoResponseDTO response = carrinhoService.verCarrinho(usuarioId);
         return ResponseEntity.ok(response);
     }
+    @Operation(summary = "Remove um item do carrinho",
+            description = "Exclui permanentemente um item (produto) do carrinho ativo.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Item removido com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Item não encontrado"),
+            @ApiResponse(responseCode = "500", description = "Erro ao acessar o Oracle")
+    })
+    @DeleteMapping("/item/{carrinhoItemId}")
+    public ResponseEntity<Void> removerItem(@PathVariable Long carrinhoItemId) {
+        carrinhoService.removerItem(carrinhoItemId);
 
+        return ResponseEntity.noContent().build();
+    }
 
 }
