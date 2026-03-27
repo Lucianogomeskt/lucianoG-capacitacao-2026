@@ -1,8 +1,7 @@
 package br.com.indra.jp_capacitacao_2026.controller;
 
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
-import br.com.indra.jp_capacitacao_2026.repository.ProdutosRepository;
-import br.com.indra.jp_capacitacao_2026.service.ProdutosService;
+import br.com.indra.jp_capacitacao_2026.service.ProdutoService;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoRequestDTO;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -11,7 +10,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -33,7 +31,7 @@ import java.util.List;
 @RequestMapping("/produtos")
 public class ProdutosController {
 
-    private final ProdutosService produtosService;
+    private final ProdutoService produtoService;
 
     @Operation(
             summary = "Cadastra um novo produto",
@@ -47,7 +45,7 @@ public class ProdutosController {
     })
     @PostMapping("/cadastrar")
     public ResponseEntity<ProdutoResponseDTO> cadastrarProduto(@Valid @RequestBody ProdutoRequestDTO dto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(produtosService.cadastrarProduto(dto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(produtoService.cadastrarProduto(dto));
     }
 
         @Operation(
@@ -60,7 +58,7 @@ public class ProdutosController {
         })
         @GetMapping
         public ResponseEntity<List<ProdutoResponseDTO>> listarTodos() {
-            return ResponseEntity.ok(produtosService.getAll());
+            return ResponseEntity.ok(produtoService.getAll());
         }
 
         @Operation(
@@ -74,7 +72,7 @@ public class ProdutosController {
         })
         @GetMapping("/{id}")
         public ResponseEntity<ProdutoResponseDTO> buscarPorId(@PathVariable Long id) {
-            return ResponseEntity.ok(produtosService.getById(id));
+            return ResponseEntity.ok(produtoService.getById(id));
         }
 
 
@@ -82,19 +80,19 @@ public class ProdutosController {
         @PutMapping("/atualiza")
     public ResponseEntity<Produtos> atualizarProduto(@RequestParam Long id,
                                                      @RequestBody Produtos produto){
-        return ResponseEntity.ok(produtosService.atualiza(produto));
+        return ResponseEntity.ok(produtoService.atualiza(produto));
     }
 
     @PatchMapping("/atualiza-preco/{id}")
     public ResponseEntity<Produtos> atualizarProdutoParcial(@PathVariable Long id,
                                                      @RequestParam BigDecimal preco) {
-        return ResponseEntity.ok(produtosService.atualizaPreco(id, preco));
+        return ResponseEntity.ok(produtoService.atualizaPreco(id, preco));
     }
 
     //Mudar para delete lógico
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> deletarProduto(@PathVariable Long id) {
-        produtosService.deletarProduto(id);
+        produtoService.deletarProduto(id);
         return ResponseEntity.noContent().build();
     }
 }

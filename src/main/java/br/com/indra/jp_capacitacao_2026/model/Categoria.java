@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Categoria {
 
     @Id
@@ -34,7 +33,6 @@ public class Categoria {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-    @Builder.Default
-    private Boolean ativo = true;
-
+    @Column(nullable = false)
+    private boolean ativo = true;
 }

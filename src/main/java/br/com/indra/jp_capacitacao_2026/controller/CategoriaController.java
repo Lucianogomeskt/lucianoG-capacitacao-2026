@@ -15,10 +15,10 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@Tag(name = "Categorias", description = "Endpoints para gerenciamento de categorias")
 @RestController
-@RequestMapping("/categorias")
 @RequiredArgsConstructor
+@Tag(name = "Categorias", description = "Endpoints para gerenciamento de categorias")
+@RequestMapping("/categorias")
 public class CategoriaController {
 
     private final CategoriaService categoriaService;

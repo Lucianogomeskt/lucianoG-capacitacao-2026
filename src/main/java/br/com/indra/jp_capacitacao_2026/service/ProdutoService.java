@@ -5,7 +5,7 @@ import br.com.indra.jp_capacitacao_2026.model.HistoricoPreco;
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
 import br.com.indra.jp_capacitacao_2026.repository.CategoriaRepository;
 import br.com.indra.jp_capacitacao_2026.repository.HistoricoPrecoRepository;
-import br.com.indra.jp_capacitacao_2026.repository.MovimentacaoEstoqueRepository;
+import br.com.indra.jp_capacitacao_2026.repository.EstoqueRepository;
 import br.com.indra.jp_capacitacao_2026.repository.ProdutosRepository;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoRequestDTO;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoResponseDTO;
@@ -14,18 +14,16 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
-public class ProdutosService {
+public class ProdutoService {
 
     private final ProdutosRepository produtosRepository;
     private final HistoricoPrecoRepository historicoPrecoRepository;
     private final CategoriaRepository categoriaRepository;
-    private final MovimentacaoEstoqueRepository movimentacaoEstoqueRepository;
+    private final EstoqueRepository estoqueRepository;
 
     @Transactional
     public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO dto) {
@@ -85,27 +83,29 @@ public class ProdutosService {
 //        return produto;
 
     }
-        private Produtos converterParaEntidade(ProdutoRequestDTO dto, Categoria categoria) {
-            Produtos produto = new Produtos();
-            produto.setNome(dto.nome());
-            produto.setDescricao(dto.descricao());
-            produto.setPreco(dto.preco());
-            produto.setCodigoBarras(dto.codigoBarras());
-            produto.setCategory(categoria);
-            produto.setAtivo(true);
-            return produto;
-        }
+    private Produtos converterParaEntidade(ProdutoRequestDTO dto, Categoria categoria) {
+        Produtos produto = new Produtos();
+        produto.setNome(dto.nome());
+        produto.setDescricao(dto.descricao());
+        produto.setPreco(dto.preco());
+        produto.setCodigoBarras(dto.codigoBarras());
+        produto.setCategory(categoria);
+        produto.setAtivo(true);
+        produto.setQuantidadeEstoque(0);
 
-        private ProdutoResponseDTO converterParaDTO(Produtos produto) {
-            return new ProdutoResponseDTO(
-                    produto.getId(),
-                    produto.getNome(),
-                    produto.getDescricao(),
-                    produto.getPreco(),
-                    produto.getCodigoBarras(),
-                    produto.getCategory().getName()
-            );
-        }
+        return produto;
+    }
+
+    private ProdutoResponseDTO converterParaDTO(Produtos produto) {
+        return new ProdutoResponseDTO(
+                produto.getId(),
+                produto.getNome(),
+                produto.getPreco(),
+                produto.getQuantidadeEstoque()
+        );
+    }
+
+
 }
 /***
  * Rastreabilidade

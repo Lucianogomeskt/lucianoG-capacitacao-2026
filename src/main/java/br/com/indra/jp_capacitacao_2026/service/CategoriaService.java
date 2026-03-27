@@ -61,10 +61,12 @@ public class CategoriaService {
     }
 
     private Categoria converterParaEntidade(CategoriaRequestDTO dto) {
-        return Categoria.builder()
-                .name(dto.name())
-                .parentId(dto.parentId())
-                .build();
+        Categoria categoria = new Categoria();
+        categoria.setName(dto.name());
+        categoria.setParentId(dto.parentId());
+        categoria.setAtivo(true);
+
+        return categoria;
     }
 
     private CategoriaResponseDTO converterParaDTO(Categoria categoria) {
