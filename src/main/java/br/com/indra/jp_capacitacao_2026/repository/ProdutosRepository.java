@@ -14,6 +14,6 @@ public interface ProdutosRepository extends JpaRepository<Produtos, Long> {
 
     Optional<Produtos> findByIdAndAtivoTrue(Long id);
 
-
+    boolean existsByCategoriaId(Long categoriaId);
 
 }

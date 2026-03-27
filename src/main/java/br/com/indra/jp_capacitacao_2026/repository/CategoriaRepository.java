@@ -12,9 +12,8 @@ import java.util.Optional;
 @Repository
 public interface CategoriaRepository extends JpaRepository<Categoria, Long> {
 
-    boolean existsByNameAndParentId(@NotBlank(message = "O nome da categoria é obrigatório") String name, Long aLong);
+    boolean existsByNameIgnoreCaseAndParentId(String name, Long parentId);
 
-    List<Categoria> findAllByAtivoTrue();
+    boolean existsByNameIgnoreCaseAndParentIdAndIdNot(String name, Long parentId, Long id);
 
-    Optional<Categoria> findByIdAndAtivoTrue(Long id);
 }
