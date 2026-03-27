@@ -5,6 +5,7 @@ import br.com.indra.jp_capacitacao_2026.repository.HistoricoPrecoRepository;
 import br.com.indra.jp_capacitacao_2026.service.dto.HistoricoProdutoDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Set;
@@ -15,26 +16,19 @@ public class HistoricoService {
 
     private final HistoricoPrecoRepository historicoPrecoRepository;
 
-    public HistoricoProdutoDTO getHistoricoByProdutoId(Long produtoId) {
+    @Transactional(readOnly = true)
+    public List<HistoricoProdutoDTO> getHistoricoByProdutoId(Long produtoId) {
         Set<HistoricoPreco> historicoPrecos = historicoPrecoRepository.findByProdutosId(produtoId);
 
-
-                //.stream().flatMap(/*desenvolveria o mapeamento*/).toList();
-        /**
-         * Existe várias forma de se mappear, map, flatmap, for, stream, mapperstruct, projection
-         */
-              /*
-
-        return new HistoricoProdutoDTO(
-                historicoPrecos.getId(),
-                historicoPrecos.getProdutos().getNome(),
-                historicoPrecos.getPrecoAntigo(),
-                historicoPrecos.getPrecoNovo(),
-                historicoPrecos.getDataAlteracao()
-        );
-       */
-
-//
-        return null;
+        return historicoPrecos.stream()
+                .map(h -> new HistoricoProdutoDTO(
+                        h.getId(),
+                        h.getProdutos().getNome(),
+                        h.getPrecoAntigo(),
+                        h.getPrecoNovo(),
+                        h.getDataAlteracao()
+                ))
+                .sorted((h1, h2) -> h2.dataRegistro().compareTo(h1.dataRegistro()))
+                .toList();
     }
 }
