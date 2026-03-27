@@ -45,7 +45,6 @@ public class Estoque {
         this.createdAt = LocalDateTime.now();
         if (this.createdBy == null) {
             this.createdBy = "SISTEMA";
-
         }
     */
     }

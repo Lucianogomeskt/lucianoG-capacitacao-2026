@@ -18,42 +18,32 @@ import org.springframework.stereotype.Service;
 public class EstoqueService {
 
     private final EstoqueRepository movimentacaoRepository;
-    private final ProdutosRepository produtosRepository;
-
+    private final ProdutoService produtoService;
     @Transactional
     public EstoqueResponseDTO registrarEstoque(@Valid EstoqueRequestDTO dto) {
+        produtoService.ajustarEstoque(dto.productId(), dto.delta());
 
-        Produtos produto = produtosRepository.findById(dto.productId())
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-
-        int valorMovimentado = dto.delta();
-        int novoSaldo = produto.getQuantidadeEstoque() + valorMovimentado;
-
-        if (novoSaldo < 0) {
-            throw new RuntimeException("Saldo insuficiente!");
-        }
+        Produtos produto = produtoService.getEntidadeById(dto.productId());
 
         Estoque movimentacao = new Estoque();
-        movimentacao.setProduto(produto);
-        movimentacao.setDelta(valorMovimentado);
-
-        movimentacao.setReason(MotivoEstoque.valueOf(dto.reason().toUpperCase()));
-
-        movimentacao.setReferenceId(dto.referenceId());
-        movimentacao.setCreatedBy("movimentacao_estoque");
 
         movimentacaoRepository.save(movimentacao);
 
-        produto.setQuantidadeEstoque(novoSaldo);
-        produtosRepository.save(produto);
-
+        return converterParaDTO(movimentacao, produto);
+    }
+    private EstoqueResponseDTO converterParaDTO(Estoque movimentacao, Produtos produto) {
         return new EstoqueResponseDTO(
                 movimentacao.getId(),
                 produto.getNome(),
                 movimentacao.getDelta(),
                 movimentacao.getReason().name(),
                 movimentacao.getCreatedAt(),
-                novoSaldo
+                produto.getQuantidadeEstoque()
         );
     }
 }
+
+
+
+
+

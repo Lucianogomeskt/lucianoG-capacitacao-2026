@@ -11,9 +11,10 @@ import br.com.indra.jp_capacitacao_2026.repository.HistoricoPrecoRepository;
 import br.com.indra.jp_capacitacao_2026.repository.ProdutosRepository;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoRequestDTO;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoResponseDTO;
-import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -38,6 +39,12 @@ public class ProdutoService {
         Produtos produtoSalvo = produtosRepository.save(produto);
 
         return converterParaDTO(produtoSalvo);
+    }
+
+    @Transactional(readOnly = true)
+    public Produtos getEntidadeById(Long id) {
+        return produtosRepository.findByIdAndAtivoTrue(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado!"));
     }
 
     public List<ProdutoResponseDTO> getAll() {
@@ -83,6 +90,11 @@ public class ProdutoService {
     }
 
     @Transactional
+    public void salvarProdutoInterno(Produtos produto) {
+        produtosRepository.save(produto);
+    }
+
+    @Transactional
     public ProdutoResponseDTO atualizarPreco(Long id, BigDecimal novoPreco) {
         Produtos produto = produtosRepository.findByIdAndAtivoTrue(id)
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado para atualização de preço."));
@@ -124,16 +136,3 @@ public class ProdutoService {
     }
 }
 
-/***
- * Rastreabilidade implementada em atualizarPreco:
- * 1 - Busca produto ativo
- * 2 - Armazena preço antigo (old value)
- * 3 - Atualiza com novo preço (new value)
- * 4 - Salva registro na tabela HistoricoPreco relacionando o produto
- * * Estrutura da tabela historico de preços no Oracle:
- * ID (PK)
- * PRODUTO_ID (FK)
- * PRECO_ANTIGO
- * PRECO_NOVO
- * DATA_ALTERACAO
- */
