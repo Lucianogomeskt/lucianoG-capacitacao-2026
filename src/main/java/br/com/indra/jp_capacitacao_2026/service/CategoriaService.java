@@ -76,8 +76,8 @@ public class CategoriaService {
     public void deletar(Long id) {
         buscarEntidadePorId(id);
 
-        if (produtosRepository.existsByCategoriaId(id)) {
-            throw new EntidadeConflitoException("Negado: Existem produtos vinculados a esta categoria");
+        if (produtosRepository.existsByCategory_Id(id)) {
+            throw new EntidadeConflitoException("Não é possível excluir: existem produtos vinculados a esta categoria.");
         }
 
         categoriaRepository.deleteById(id);

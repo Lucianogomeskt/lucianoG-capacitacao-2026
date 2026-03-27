@@ -6,7 +6,7 @@ import br.com.indra.jp_capacitacao_2026.repository.EstoqueRepository;
 import br.com.indra.jp_capacitacao_2026.repository.ProdutosRepository;
 import br.com.indra.jp_capacitacao_2026.service.dto.EstoqueRequestDTO;
 import br.com.indra.jp_capacitacao_2026.service.dto.EstoqueResponseDTO;
-import br.com.indra.jp_capacitacao_2026.enums.MotivoEstoque; // Certifique-se de que o import do seu Enum está aqui
+import br.com.indra.jp_capacitacao_2026.enums.MotivoEstoque;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 

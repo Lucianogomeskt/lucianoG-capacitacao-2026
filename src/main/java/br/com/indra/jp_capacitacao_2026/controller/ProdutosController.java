@@ -1,6 +1,5 @@
 package br.com.indra.jp_capacitacao_2026.controller;
 
-import br.com.indra.jp_capacitacao_2026.model.Produtos;
 import br.com.indra.jp_capacitacao_2026.service.ProdutoService;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoRequestDTO;
 import br.com.indra.jp_capacitacao_2026.service.dto.ProdutoResponseDTO;
@@ -17,7 +16,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -27,72 +25,80 @@ import java.math.BigDecimal;
 import java.util.List;
 @RestController
 @RequiredArgsConstructor
-@Tag(name = "Produtos", description = "Endpoints para gerenciamento de produtos")
+@Tag(name = "Produtos", description = "Gerenciamento completo de produtos e estoque no banco Oracle")
 @RequestMapping("/produtos")
 public class ProdutosController {
 
     private final ProdutoService produtoService;
 
-    @Operation(
-            summary = "Cadastra um novo produto",
-            description = "Cria um produto no banco Oracle associado a uma categoria. A categoria deve estar ativa."
-    )
+    @Operation(summary = "Cadastra um novo produto", description = "Cria um produto ativo vinculado a uma categoria existente.")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Produto cadastrado com sucesso"),
-            @ApiResponse(responseCode = "400", description = "Dados de requisição inválidos (validação de campos)"),
-            @ApiResponse(responseCode = "404", description = "Categoria não encontrada ou está inativa no sistema"),
-            @ApiResponse(responseCode = "500", description = "Erro interno ao processar a operação no banco")
+            @ApiResponse(responseCode = "201", description = "Produto criado com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Erro de validação nos campos enviados"),
+            @ApiResponse(responseCode = "404", description = "Categoria informada não encontrada"),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     })
     @PostMapping("/cadastrar")
     public ResponseEntity<ProdutoResponseDTO> cadastrarProduto(@Valid @RequestBody ProdutoRequestDTO dto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(produtoService.cadastrarProduto(dto));
     }
 
-        @Operation(
-                summary = "Lista todos os produtos ativos",
-                description = "Retorna uma lista de todos os produtos que possuem status ativo no banco Oracle."
-        )
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "200", description = "Lista recuperada com sucesso"),
-                @ApiResponse(responseCode = "500", description = "Erro interno ao processar a consulta")
-        })
-        @GetMapping
-        public ResponseEntity<List<ProdutoResponseDTO>> listarTodos() {
-            return ResponseEntity.ok(produtoService.getAll());
+    @Operation(summary = "Lista todos os produtos ativos", description = "Retorna apenas produtos com status ativo=true.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Lista retornada com sucesso"),
+            @ApiResponse(responseCode = "204", description = "Nenhum produto ativo encontrado"),
+            @ApiResponse(responseCode = "500", description = "Erro ao consultar o banco de dados")
+    })
+    @GetMapping
+    public ResponseEntity<List<ProdutoResponseDTO>> listarTodos() {
+        List<ProdutoResponseDTO> lista = produtoService.getAll();
+        if (lista.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
-
-        @Operation(
-                summary = "Busca um produto por ID",
-                description = "Retorna os detalhes de um produto específico, desde que ele esteja ativo."
-        )
-        @ApiResponses(value = {
-                @ApiResponse(responseCode = "200", description = "Produto encontrado com sucesso"),
-                @ApiResponse(responseCode = "404", description = "Produto não encontrado ou inativo no sistema"),
-                @ApiResponse(responseCode = "500", description = "Erro interno ao buscar o produto")
-        })
-        @GetMapping("/{id}")
-        public ResponseEntity<ProdutoResponseDTO> buscarPorId(@PathVariable Long id) {
-            return ResponseEntity.ok(produtoService.getById(id));
-        }
-
-
-
-        @PutMapping("/atualiza")
-    public ResponseEntity<Produtos> atualizarProduto(@RequestParam Long id,
-                                                     @RequestBody Produtos produto){
-        return ResponseEntity.ok(produtoService.atualiza(produto));
+        return ResponseEntity.ok(lista);
     }
 
-    @PatchMapping("/atualiza-preco/{id}")
-    public ResponseEntity<Produtos> atualizarProdutoParcial(@PathVariable Long id,
-                                                     @RequestParam BigDecimal preco) {
-        return ResponseEntity.ok(produtoService.atualizaPreco(id, preco));
+    @Operation(summary = "Busca produto por ID", description = "Retorna os detalhes se o produto existir e estiver ativo.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Produto encontrado"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado ou inativo"),
+            @ApiResponse(description = "ID inválido", responseCode = "400")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<ProdutoResponseDTO> buscarPorId(@PathVariable Long id) {
+        return ResponseEntity.ok(produtoService.getById(id));
     }
 
-    //Mudar para delete lógico
-    @DeleteMapping("/delete/{id}")
+    @Operation(summary = "Movimentação de estoque", description = "Soma (valor positivo) ou subtrai (valor negativo) do estoque atual.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Estoque atualizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado"),
+            @ApiResponse(responseCode = "409", description = "Estoque insuficiente para a saída solicitada")
+    })
+    @PatchMapping("/{id}/estoque")
+    public ResponseEntity<Void> ajustarEstoque(@PathVariable Long id, @RequestParam Integer quantidade) {
+        produtoService.ajustarEstoque(id, quantidade);
+        return ResponseEntity.noContent().build();
+    }
+
+    @Operation(summary = "Atualiza preço com rastreabilidade", description = "Altera o preço e gera log automático na tabela de Histórico.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Preço alterado e histórico registrado"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado para atualização")
+    })
+    @PatchMapping("/{id}/preco")
+    public ResponseEntity<ProdutoResponseDTO> atualizarPreco(@PathVariable Long id, @RequestParam BigDecimal preco) {
+        return ResponseEntity.ok(produtoService.atualizarPreco(id, preco));
+    }
+
+    @Operation(summary = "Desativa um produto (Delete Lógico)", description = "Altera o status 'ativo' para false para preservar o histórico de preços.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Produto desativado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado para desativação")
+    })
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletarProduto(@PathVariable Long id) {
-        produtoService.deletarProduto(id);
+        produtoService.desativarProduto(id);
         return ResponseEntity.noContent().build();
     }
 }

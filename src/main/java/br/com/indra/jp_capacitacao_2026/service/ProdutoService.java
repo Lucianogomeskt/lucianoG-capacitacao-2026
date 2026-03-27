@@ -1,8 +1,9 @@
 package br.com.indra.jp_capacitacao_2026.service;
 
-
+import br.com.indra.jp_capacitacao_2026.exception.EntidadeConflitoException;
 import br.com.indra.jp_capacitacao_2026.exception.RecursoNaoEncontradoException;
 import br.com.indra.jp_capacitacao_2026.model.Categoria;
+import br.com.indra.jp_capacitacao_2026.model.HistoricoPreco;
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
 import br.com.indra.jp_capacitacao_2026.repository.CategoriaRepository;
 import br.com.indra.jp_capacitacao_2026.repository.EstoqueRepository;
@@ -32,6 +33,7 @@ public class ProdutoService {
     public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO dto) {
         Categoria categoria = categoriaRepository.findById(dto.categoriaId())
                 .orElseThrow(() -> new RecursoNaoEncontradoException("Não é possível cadastrar: Categoria ID " + dto.categoriaId() + " não encontrada no sistema."));
+
         Produtos produto = converterParaEntidade(dto, categoria);
         Produtos produtoSalvo = produtosRepository.save(produto);
 
@@ -40,63 +42,66 @@ public class ProdutoService {
 
     public List<ProdutoResponseDTO> getAll() {
         List<Produtos> entidades = produtosRepository.findAllByAtivoTrue();
-
         List<ProdutoResponseDTO> dtos = new ArrayList<>();
 
         for (Produtos produto : entidades) {
-            ProdutoResponseDTO dto = converterParaDTO(produto);
-            dtos.add(dto);
+            dtos.add(converterParaDTO(produto));
         }
-
         return dtos;
     }
 
     public ProdutoResponseDTO getById(Long id) {
         Optional<Produtos> optionalProduto = produtosRepository.findByIdAndAtivoTrue(id);
         if (optionalProduto.isPresent()) {
-            Produtos produto = optionalProduto.get();
-            return converterParaDTO(produto);
+            return converterParaDTO(optionalProduto.get());
         } else {
             throw new RecursoNaoEncontradoException("Produto ID " + id + " não encontrado ou está inativo.");
         }
     }
 
-    public Produtos atualiza(Produtos produto) {
-        return produtosRepository.save(produto);
+    @Transactional
+    public void ajustarEstoque(Long id, Integer quantidadeMovimentada) {
+        Produtos produto = produtosRepository.findByIdAndAtivoTrue(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Produto ID " + id + " não encontrado ou inativo."));
+
+        int novaQuantidade = produto.getQuantidadeEstoque() + quantidadeMovimentada;
+
+        if (novaQuantidade < 0) {
+            throw new EntidadeConflitoException("Operação negada: Estoque insuficiente! Saldo atual: " + produto.getQuantidadeEstoque());
+        }
+
+        produto.setQuantidadeEstoque(novaQuantidade);
+        produtosRepository.save(produto);
     }
 
-    public void deletarProduto(Long id) {
-        produtosRepository.deleteById(id);
+    @Transactional
+    public void desativarProduto(Long id) {
+        Produtos produto = produtosRepository.findByIdAndAtivoTrue(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado ou já está inativo."));
+        produto.setAtivo(false);
+        produtosRepository.save(produto);
     }
 
+    @Transactional
+    public ProdutoResponseDTO atualizarPreco(Long id, BigDecimal novoPreco) {
+        Produtos produto = produtosRepository.findByIdAndAtivoTrue(id)
+                .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado para atualização de preço."));
 
+        BigDecimal precoAntigo = produto.getPreco();
 
-    public Produtos atualizaPreco(Long id, BigDecimal preco) {
-//        Produtos produto = produtosRepository.findById(id).get();
-        final var produto = produtosRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Produto não encontrado"));
-        produto.setPreco(preco);
-/*
-        final var historico = new HistoricoPreco();
-        historico.setPrecoAntigo(produto.getPreco());
+        produto.setPreco(novoPreco);
+        produtosRepository.save(produto);
+
+        HistoricoPreco historico = new HistoricoPreco();
         historico.setProdutos(produto);
-        historico.setPrecoNovo(preco);
+        historico.setPrecoAntigo(precoAntigo);
+        historico.setPrecoNovo(novoPreco);
 
-        //Código abaixo pode ser substituido por @CreationTimestamp
-//        historico.setDataAlteracao(LocalDateTime.now());
         historicoPrecoRepository.save(historico);
-        return produtosRepository.saveAndFlush(produto);
 
-        //Exemplo de não se fazer por gerar retrabalho
-          final var historicoNovo = historicoPrecoRepository.findById(historico.getId()).get();
-          historicoNovo.setPrecoNovo(preco);
-          historicoPrecoRepository.save(historicoNovo);
-
-         * get na tabela produtos para novo preço
-
-//        return produto;
-*/
+        return converterParaDTO(produto);
     }
+
     private Produtos converterParaEntidade(ProdutoRequestDTO dto, Categoria categoria) {
         Produtos produto = new Produtos();
         produto.setNome(dto.nome());
@@ -106,7 +111,6 @@ public class ProdutoService {
         produto.setCategory(categoria);
         produto.setAtivo(true);
         produto.setQuantidadeEstoque(0);
-
         return produto;
     }
 
@@ -118,22 +122,18 @@ public class ProdutoService {
                 produto.getQuantidadeEstoque()
         );
     }
-
-
 }
+
 /***
- * Rastreabilidade
- * 1 - Criar um log
- * 2 - Adicionar em tabela historico de preços valores old e new
- * para cada produto atualizado
- * 3 - Antes de atualizar a tabela de produto, pegar o valor atual da tabela e adiconar
- * na tabela historico
- * 4 - Pegar novo valor da tabela e adicionar na tabela historico
- * 5 - Sempre na tabela, adicionar novo registro após atualizar tabela de produto
- * Estrutura da tabela historico de preços
- * id
- * id_produto
- * preco_antigo
- * preco_novo
- * data_alteracao
+ * Rastreabilidade implementada em atualizarPreco:
+ * 1 - Busca produto ativo
+ * 2 - Armazena preço antigo (old value)
+ * 3 - Atualiza com novo preço (new value)
+ * 4 - Salva registro na tabela HistoricoPreco relacionando o produto
+ * * Estrutura da tabela historico de preços no Oracle:
+ * ID (PK)
+ * PRODUTO_ID (FK)
+ * PRECO_ANTIGO
+ * PRECO_NOVO
+ * DATA_ALTERACAO
  */
