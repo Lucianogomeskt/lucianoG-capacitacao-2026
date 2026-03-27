@@ -1,5 +1,6 @@
 package br.com.indra.jp_capacitacao_2026.service;
 
+import br.com.indra.jp_capacitacao_2026.enums.MotivoEstoque;
 import br.com.indra.jp_capacitacao_2026.model.Estoque;
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
 import br.com.indra.jp_capacitacao_2026.repository.EstoqueRepository;
@@ -44,7 +45,24 @@ public class EstoqueService {
         produto.setQuantidadeEstoque(novoSaldo);
     }
 
+    @Transactional
+    public EstoqueResponseDTO registrarDevolucao(@Valid EstoqueRequestDTO dto) {
+        int deltaPositivo = Math.abs(dto.delta());
 
+        produtoService.ajustarEstoque(dto.productId(), deltaPositivo);
+
+        Produtos produto = produtoService.getEntidadeById(dto.productId());
+
+        Estoque movimentacao = new Estoque();
+        movimentacao.setProduto(produto);
+        movimentacao.setDelta(deltaPositivo);
+        movimentacao.setReason(MotivoEstoque.DEVOLUCAO);
+        movimentacao.setReferenceId(dto.referenceId());
+
+        movimentacaoRepository.save(movimentacao);
+
+        return converterParaDTO(movimentacao, produto);
+    }
 
 
 

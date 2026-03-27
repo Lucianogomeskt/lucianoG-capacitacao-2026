@@ -51,7 +51,19 @@ public class EstoqueController {
         return ResponseEntity.ok().build();
     }
 
-
+    @Operation(
+            summary = "Registra a devolução de um produto",
+            description = "Incrementa o saldo do produto no Oracle e gera um log com o motivo DEVOLUCAO."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Devolução registrada com sucesso"),
+            @ApiResponse(responseCode = "400", description = "Dados inválidos"),
+            @ApiResponse(responseCode = "404", description = "Produto não encontrado")
+    })
+    @PostMapping("/devolucao")
+    public ResponseEntity<EstoqueResponseDTO> devolver(@RequestBody @Valid EstoqueRequestDTO dto) {
+        return ResponseEntity.ok(estoqueService.registrarDevolucao(dto));
+    }
 
 
 
