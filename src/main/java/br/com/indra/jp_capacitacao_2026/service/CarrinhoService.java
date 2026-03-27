@@ -18,14 +18,24 @@ public class CarrinhoService {
     private final CarrinhoRepository carrinhoRepository;
 
     @Transactional
-    public CarrinhoResponseDTO buscarOuCriarCarrinho(Long usuarioId) {
-        Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndStatus(usuarioId, StatusCarrinho.ATIVO)
+    public CarrinhoResponseDTO buscarOuCriarCarrinho(CarrinhoRequestDTO dto) {
+        Carrinho carrinho = pegarOuCriar(dto);
+        return converterParaDTO(carrinho);
+    }
+
+    private Carrinho pegarOuCriar(CarrinhoRequestDTO dto) {
+        return carrinhoRepository.findByUsuarioIdAndStatus(dto.usuarioId(), StatusCarrinho.ATIVO)
                 .orElseGet(() -> {
-                    Carrinho novo = new Carrinho();
-                    novo.setUsuarioId(usuarioId);
-                    novo.setStatus(StatusCarrinho.ATIVO);
+
+                    Carrinho novo = converterParaEntidade(dto);
                     return carrinhoRepository.save(novo);
                 });
+    }
+
+    @Transactional(readOnly = true)
+    public CarrinhoResponseDTO verCarrinho(Long usuarioId) {
+        Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndStatus(usuarioId, StatusCarrinho.ATIVO)
+                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado para o usuário: " + usuarioId));
 
         return converterParaDTO(carrinho);
     }
@@ -48,4 +58,3 @@ public class CarrinhoService {
         );
     }
 }
-

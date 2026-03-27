@@ -1,6 +1,7 @@
 package br.com.indra.jp_capacitacao_2026.controller;
 
 import br.com.indra.jp_capacitacao_2026.service.CarrinhoService;
+import br.com.indra.jp_capacitacao_2026.service.dto.CarrinhoRequestDTO;
 import br.com.indra.jp_capacitacao_2026.service.dto.CarrinhoResponseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,10 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/carrinho")
@@ -28,9 +26,23 @@ public class CarrinhoController {
             @ApiResponse(responseCode = "404", description = "Usuário não encontrado"),
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor Oracle")
     })
-    @GetMapping("/usuario/{usuarioId}")
-    public ResponseEntity<CarrinhoResponseDTO> buscarOuCriar(@PathVariable Long usuarioId) {
-        CarrinhoResponseDTO response = carrinhoService.buscarOuCriarCarrinho(usuarioId);
+    @PostMapping("/buscar-ou-criar")
+    public ResponseEntity<CarrinhoResponseDTO> buscarOuCriar(@RequestBody CarrinhoRequestDTO dto) {
+        CarrinhoResponseDTO response = carrinhoService.buscarOuCriarCarrinho(dto);
         return ResponseEntity.ok(response);
     }
+    @Operation(summary = "Visualiza o carrinho ativo",
+            description = "Retorna os detalhes e o total do carrinho ATIVO do usuário informado.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Carrinho localizado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Carrinho não encontrado para este usuário"),
+            @ApiResponse(responseCode = "500", description = "Erro interno no servidor Oracle")
+    })
+    @GetMapping("/usuario/{usuarioId}/ver")
+    public ResponseEntity<CarrinhoResponseDTO> verCarrinho(@PathVariable Long usuarioId) {
+        CarrinhoResponseDTO response = carrinhoService.verCarrinho(usuarioId);
+        return ResponseEntity.ok(response);
+    }
+
+
 }
