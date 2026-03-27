@@ -1,7 +1,9 @@
 package br.com.indra.jp_capacitacao_2026.service;
 
-import br.com.indra.jp_capacitacao_2026.exception.EntidadeConflitoException;
-import br.com.indra.jp_capacitacao_2026.exception.RecursoNaoEncontradoException;
+import br.com.indra.jp_capacitacao_2026.exception.CampoObrigatorioException;
+import br.com.indra.jp_capacitacao_2026.exception.EntidadeNaoEncontradaException;
+import br.com.indra.jp_capacitacao_2026.exception.ProdutoNaoEncontradoException;
+import br.com.indra.jp_capacitacao_2026.exception.SaldoInsuficienteException;
 import br.com.indra.jp_capacitacao_2026.model.Categoria;
 import br.com.indra.jp_capacitacao_2026.model.HistoricoPreco;
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
@@ -33,7 +35,7 @@ public class ProdutoService {
     @Transactional
     public ProdutoResponseDTO cadastrarProduto(ProdutoRequestDTO dto) {
         Categoria categoria = categoriaRepository.findById(dto.categoriaId())
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Não é possível cadastrar: Categoria ID " + dto.categoriaId() + " não encontrada no sistema."));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Não é possível cadastrar: Categoria ID " + dto.categoriaId() + " não encontrada no sistema."));
 
         Produtos produto = converterParaEntidade(dto, categoria);
         Produtos produtoSalvo = produtosRepository.save(produto);
@@ -44,7 +46,7 @@ public class ProdutoService {
     @Transactional(readOnly = true)
     public Produtos getEntidadeById(Long id) {
         return produtosRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado!"));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado!"));
     }
 
     public List<ProdutoResponseDTO> getAll() {
@@ -62,7 +64,7 @@ public class ProdutoService {
         if (optionalProduto.isPresent()) {
             return converterParaDTO(optionalProduto.get());
         } else {
-            throw new RecursoNaoEncontradoException("Produto ID " + id + " não encontrado ou está inativo.");
+            throw new ProdutoNaoEncontradoException("Produto ID " + id + " não encontrado ou está inativo.");
         }
     }
 
@@ -73,7 +75,7 @@ public class ProdutoService {
         int novoSaldo = produto.getQuantidadeEstoque() + delta;
 
         if (novoSaldo < 0) {
-            throw new RuntimeException("Saldo insuficiente: " + produto.getNome());
+            throw new SaldoInsuficienteException("Saldo insuficiente: " + produto.getNome());
         }
 
         produto.setQuantidadeEstoque(novoSaldo);
@@ -82,20 +84,23 @@ public class ProdutoService {
     @Transactional
     public void desativarProduto(Long id) {
         Produtos produto = produtosRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado ou já está inativo."));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado ou já está inativo."));
         produto.setAtivo(false);
         produtosRepository.save(produto);
     }
-
+   /*
     @Transactional
     public void salvarProdutoInterno(Produtos produto) {
+        if (produto == null) {
+            throw new CampoObrigatorioException("Não é possível salvar um produto nulo!");
+        }
         produtosRepository.save(produto);
     }
-
+   */
     @Transactional
     public ProdutoResponseDTO atualizarPreco(Long id, BigDecimal novoPreco) {
         Produtos produto = produtosRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Produto não encontrado para atualização de preço."));
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Produto não encontrado para atualização de preço."));
 
         BigDecimal precoAntigo = produto.getPreco();
 

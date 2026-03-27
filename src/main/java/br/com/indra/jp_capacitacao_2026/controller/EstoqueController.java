@@ -65,7 +65,20 @@ public class EstoqueController {
         return ResponseEntity.ok(estoqueService.registrarDevolucao(dto));
     }
 
+    @Operation(
+            summary = "Exclui um registro de movimentação",
+            description = "Remove fisicamente o log de auditoria do Oracle. Cuidado: isso não estorna o saldo do produto."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Movimentação excluída com sucesso"),
+            @ApiResponse(responseCode = "404", description = "ID da movimentação não encontrado")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        estoqueService.deletarMovimentacao(id);
 
+        return ResponseEntity.noContent().build();
+    }
 
 
 }

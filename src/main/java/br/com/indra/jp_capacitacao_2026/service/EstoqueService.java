@@ -1,6 +1,8 @@
 package br.com.indra.jp_capacitacao_2026.service;
 
 import br.com.indra.jp_capacitacao_2026.enums.MotivoEstoque;
+import br.com.indra.jp_capacitacao_2026.exception.ProdutoNaoEncontradoException;
+import br.com.indra.jp_capacitacao_2026.exception.SaldoInsuficienteException;
 import br.com.indra.jp_capacitacao_2026.model.Estoque;
 import br.com.indra.jp_capacitacao_2026.model.Produtos;
 import br.com.indra.jp_capacitacao_2026.repository.EstoqueRepository;
@@ -39,7 +41,7 @@ public class EstoqueService {
         int novoSaldo = produto.getQuantidadeEstoque() + delta;
 
         if (novoSaldo < 0) {
-            throw new RuntimeException("Saldo insuficiente para o produto: " + produto.getNome());
+            throw new SaldoInsuficienteException("Saldo insuficiente para o produto: " + produto.getNome());
         }
 
         produto.setQuantidadeEstoque(novoSaldo);
@@ -64,21 +66,13 @@ public class EstoqueService {
         return converterParaDTO(movimentacao, produto);
     }
 
+    @Transactional
+    public void deletarMovimentacao(Long id) {
+        Estoque movimentacao = movimentacaoRepository.findById(id)
+                .orElseThrow(() -> new ProdutoNaoEncontradoException("Movimentação de estoque ID " + id + " não encontrada."));
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        movimentacaoRepository.delete(movimentacao);
+    }
     private EstoqueResponseDTO converterParaDTO(Estoque movimentacao, Produtos produto) {
         return new EstoqueResponseDTO(
                 movimentacao.getId(),

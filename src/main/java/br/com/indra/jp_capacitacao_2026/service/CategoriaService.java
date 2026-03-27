@@ -1,7 +1,6 @@
 package br.com.indra.jp_capacitacao_2026.service;
 
-import br.com.indra.jp_capacitacao_2026.exception.RecursoNaoEncontradoException;
-import br.com.indra.jp_capacitacao_2026.exception.EntidadeConflitoException;
+import br.com.indra.jp_capacitacao_2026.exception.*;
 import br.com.indra.jp_capacitacao_2026.model.Categoria;
 import br.com.indra.jp_capacitacao_2026.repository.CategoriaRepository;
 import br.com.indra.jp_capacitacao_2026.repository.ProdutosRepository;
@@ -24,7 +23,7 @@ public class CategoriaService {
     @Transactional
     public CategoriaResponseDTO cadastrarCategoria(CategoriaRequestDTO dto) {
         if (dto.name() == null || dto.name().isBlank()) {
-            throw new EntidadeConflitoException("Nome da categoria deve ser informado!");
+            throw new CampoObrigatorioException("Nome da categoria deve ser informado!");
         }
 
         if (categoriaRepository.existsByNameIgnoreCaseAndParentId(dto.name(), dto.parentId())) {
@@ -58,7 +57,7 @@ public class CategoriaService {
         Categoria existente = buscarEntidadePorId(id);
 
         if (dto.name() == null || dto.name().isBlank()) {
-            throw new EntidadeConflitoException("O nome deve ser informado para atualizar!");
+            throw new CampoObrigatorioException("O nome deve ser informado para atualizar!");
         }
 
         if (categoriaRepository.existsByNameIgnoreCaseAndParentIdAndIdNot(dto.name(), dto.parentId(), id)) {
@@ -77,7 +76,7 @@ public class CategoriaService {
         buscarEntidadePorId(id);
 
         if (produtosRepository.existsByCategory_Id(id)) {
-            throw new EntidadeConflitoException("Não é possível excluir: existem produtos vinculados a esta categoria.");
+            throw new EntidadeEmUsoException("Não é possível excluir: existem produtos vinculados a esta categoria.");
         }
 
         categoriaRepository.deleteById(id);
@@ -85,7 +84,7 @@ public class CategoriaService {
 
     protected Categoria buscarEntidadePorId(Long id) {
         return categoriaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Categoria não encontrada"));
+                .orElseThrow(() -> new CategoriaNaoEncontradaException("Categoria não encontrada"));
     }
 
     private Categoria converterParaEntidade(CategoriaRequestDTO dto) {
