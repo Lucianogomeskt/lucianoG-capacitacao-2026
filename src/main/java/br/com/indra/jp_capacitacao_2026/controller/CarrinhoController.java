@@ -57,4 +57,18 @@ public class CarrinhoController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(summary = "Esvazia o carrinho do usuário",
+            description = "Remove todos os itens (produtos) do carrinho sem excluir o carrinho em si.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Carrinho esvaziado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Carrinho não encontrado")
+    })
+    @DeleteMapping("/esvaziar/{usuarioId}")
+    public ResponseEntity<Void> esvaziar(@PathVariable Long usuarioId) {
+        carrinhoService.esvaziarCarrinho(usuarioId);
+
+        return ResponseEntity.noContent().build();
+    }
+
+
 }

@@ -51,6 +51,14 @@ public class CarrinhoService {
         carrinhoItemRepository.deleteById(carrinhoItemId);
     }
 
+    @Transactional
+    public void esvaziarCarrinho(Long usuarioId) {
+        Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndStatus(usuarioId, StatusCarrinho.ATIVO)
+                .orElseThrow(() -> new RuntimeException("Carrinho ativo não encontrado para esvaziar."));
+        carrinho.getItens().clear();
+        carrinhoRepository.save(carrinho);
+    }
+
     private Carrinho converterParaEntidade(CarrinhoRequestDTO dto) {
         Carrinho carrinho = new Carrinho();
         carrinho.setUsuarioId(dto.usuarioId());
