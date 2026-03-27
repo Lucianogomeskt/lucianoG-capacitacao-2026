@@ -67,18 +67,16 @@ public class ProdutoService {
     }
 
     @Transactional
-    public void ajustarEstoque(Long id, Integer quantidadeMovimentada) {
-        Produtos produto = produtosRepository.findByIdAndAtivoTrue(id)
-                .orElseThrow(() -> new RecursoNaoEncontradoException("Produto ID " + id + " não encontrado ou inativo."));
+    public void ajustarEstoque(Long produtoId, int delta) {
+        Produtos produto = getEntidadeById(produtoId);
 
-        int novaQuantidade = produto.getQuantidadeEstoque() + quantidadeMovimentada;
+        int novoSaldo = produto.getQuantidadeEstoque() + delta;
 
-        if (novaQuantidade < 0) {
-            throw new EntidadeConflitoException("Operação negada: Estoque insuficiente! Saldo atual: " + produto.getQuantidadeEstoque());
+        if (novoSaldo < 0) {
+            throw new RuntimeException("Saldo insuficiente: " + produto.getNome());
         }
 
-        produto.setQuantidadeEstoque(novaQuantidade);
-        produtosRepository.save(produto);
+        produto.setQuantidadeEstoque(novoSaldo);
     }
 
     @Transactional
