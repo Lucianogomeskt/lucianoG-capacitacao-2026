@@ -1,334 +1,81 @@
-# ✅ **Sugestões de Evolução — Regras de Negócio e Melhorias (para os alunos)**
 
-Este projeto foi criado como introdução ao Java e pode ser ampliado com novas regras de negócio, entidades, validações e funcionalidades.
-As sugestões abaixo servem como **exercícios guiados** para aprimorar o domínio de API REST, Java, Spring Boot, autenticação, modelagem de dados e boas práticas.
+# E-Commerce API | Treinamento Java & Oracle | Minsait
 
-As funcionalidades estão organizadas por prioridade e dificuldade.
+Este projeto é uma API REST robusta desenvolvida para o gerenciamento de um e-commerce, focada em boas práticas de desenvolvimento, persistência em banco de dados relacional e arquitetura escalável.
 
----
+## 🚀 O que o sistema faz atualmente?
+Com base na nossa documentação interativa (Swagger), o sistema permite:
 
-## ✅ 1. Categorias e Organização do Catálogo
-
-**Prioridade:** Alta
-**Dificuldade:** Baixa
-
-### Regras:
-
-* Todo produto deve pertencer a uma categoria.
-* Categorias podem ter hierarquia (pai → filho).
-* Nome de categoria deve ser único no mesmo nível.
-
-### Endpoints sugeridos:
-
-```
-GET    /categories
-POST   /categories
-PUT    /categories/{id}
-DELETE /categories/{id}
-```
-
-### Validações:
-
-* Nome obrigatório.
-* Proibir duplicidade.
+* **Gestão de Estoque:** Registro de entradas, saídas e ajuste de saldo com rastreabilidade via métodos `PUT`.
+* **Controle de Categorias:** CRUD completo para organização lógica de produtos.
+* **Catálogo de Produtos:** Cadastro detalhado integrado ao estoque e categorias no Oracle XE.
+* **Fluxo de Carrinho:** Gerenciamento de itens e persistência por usuário.
 
 ---
 
-## ✅ 2. Controle de Estoque (Inventário)
+## 🛠️ Stack Tecnológica
+* **Linguagem:** Java 25 (Temurin JDK)
+* **Framework:** Spring Boot 3.5.11
+* **Persistência:** Spring Data JPA / Hibernate
+* **Banco de Dados:** Oracle XE 21c
+* **Documentação:** SpringDoc OpenAPI (Swagger UI)
+* **Build Tool:** Maven
 
-**Prioridade:** Alta
-**Dificuldade:** Média
+---
 
-### Regras:
+## ⚙️ Como Executar o Projeto
 
-* Cada ajuste de estoque gera um registro de `InventoryTransaction`.
-* A venda/pedido deve diminuir o estoque.
-* Impedir vendas com estoque insuficiente.
-* Notificar quando um produto atingir estoque mínimo (pode ser apenas flag).
+### 1. Pré-requisitos
+* JDK 25 instalado.
+* Oracle Database XE rodando localmente.
+* Maven configurado no seu ambiente/IDE.
 
-### Tipos de transação:
+### 2. Configuração do Banco de Dados
+O projeto utiliza variáveis de ambiente para garantir a segurança das credenciais. Configure as seguintes variáveis no seu sistema ou no IntelliJ (Edit Configurations):
 
-* Entrada (compra/fornecedor)
-* Saída (venda)
-* Ajuste
-* Devolução
+**Exemplo de configuração no `application.yml`:**
+```yaml
+spring:
+  application:
+    name: jp-capacitacao-2026
 
-### Endpoints sugeridos:
+  datasource:
+    url: ${URL_DB:jdbc:oracle:thin:@localhost:1521:xe}
+    username: ${USERNAME_DB:admin}
+    password: ${PASSWORD_DB:admin}
+    driver-class-name: oracle.jdbc.OracleDriver
 
-```
-POST /inventory/{productId}/add
-POST /inventory/{productId}/remove
-GET  /inventory/{productId}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+
+server:
+  port: 8080
 ```
 
 ---
 
-## ✅ 3. Carrinho de Compras
+## 📂 Estrutura do Projeto
+O projeto segue o padrão de camadas para facilitar a manutenção e garantir a separação de responsabilidades:
 
-**Prioridade:** Alta
-**Dificuldade:** Média
-
-### Regras:
-
-* Usuário autenticado pode ter apenas 1 carrinho ativo.
-* Itens têm `priceSnapshot` (preço do momento).
-* Atualizações recalculam totais.
-
-### Endpoints sugeridos:
-
-```
-GET  /cart
-POST /cart/items
-PUT  /cart/items/{itemId}
-DELETE /cart/items/{itemId}
-```
+* **`controller/`**: Exposição dos endpoints REST e tratamento de requisições.
+* **`service/`**: Camada de inteligência, onde residem as regras de negócio.
+* **`repository/`**: Interfaces do Spring Data JPA que gerenciam a persistência no Oracle XE.
+* **`model/` ou `entity/`**: Mapeamento objeto-relacional (ORM) das tabelas do banco.
+* **`dto/`**: Data Transfer Objects (Request/Response), garantindo segurança e validação na entrada de dados.
+* **`enums/`**: Tipos enumerados que padronizam valores fixos do sistema (ex: Status de Pedido, Tipo de Movimentação), garantindo a integridade dos dados no banco.
 
 ---
 
-## ✅ 4. Pedidos (Orders)
+## 📖 Documentação da API (Swagger)
+A documentação detalhada dos endpoints, incluindo os formatos de JSON e parâmetros necessários, pode ser acessada via Swagger UI após rodar o projeto:
 
-**Prioridade:** Alta
-**Dificuldade:** Média
+👉 `http://localhost:8080/swagger-ui.html`
 
-### Regras:
-
-* Carrinho → Pedido (checkout).
-* Status do pedido:
-
-    * `CREATED`
-    * `PAID`
-    * `SHIPPED`
-    * `DELIVERED`
-    * `CANCELLED`
-* Cancelamento permitido somente em `CREATED` ou `PAID`.
-
-### Endpoints sugeridos:
-
-```
-POST /orders
-GET  /orders/{id}
-POST /orders/{id}/cancel
-```
+Para a definição rigorosa dos códigos de retorno (Ex: **201 Created** para novos registros, **400 Bad Request** para erros de validação), foi utilizada como referência técnica a [Documentação Completa de HTTP Response Codes da Contabo](https://contabo.com/blog/http-response-codes-server-statuses/), assegurando que a API responda conforme os padrões globais da web.
 
 ---
-
-## ✅ 5. Promoções e Cupons
-
-**Prioridade:** Média
-**Dificuldade:** Média
-
-### Tipos:
-
-* Desconto percentual (%)
-* Desconto fixo (R$)
-* Promoção por categoria ou produto
-* Cupom válido por período
-* Cupom com limite de uso
-
-### Validações:
-
-* Cupom expirado → rejeitar
-* Cupom já utilizado pelo usuário → rejeitar
-* Cupom sem relação com produtos do carrinho → rejeitar
-
-### Endpoints:
-
-```
-POST /promotions
-POST /coupons/apply
-```
-
----
-
-## ✅ 6. Reviews e Avaliações
-
-**Prioridade:** Baixa
-**Dificuldade:** Baixa
-
-### Regras:
-
-* Apenas quem comprou pode avaliar.
-* Limite de 1 avaliação por produto por pedido.
-* Recalcular média a cada novo review.
-
-### Endpoints:
-
-```
-POST /reviews
-GET  /reviews/product/{productId}
-```
-
----
-
-## ✅ 7. Auditoria (Audit Log)
-
-**Prioridade:** Média
-**Dificuldade:** Baixa
-
-### Regras:
-
-* Registrar:
-
-    * quem criou/alterou/deletou
-    * data e hora
-    * antes e depois da alteração (JSON)
-* Auditoria deve ser imutável.
-
-### Endpoints:
-
-```
-GET /audit?entity=Product
-```
-
----
-
-## ✅ 8. Relatórios e Métricas
-
-**Prioridade:** Baixa
-**Dificuldade:** Média
-
-### Exemplos:
-
-* Produtos mais vendidos.
-* Faturamento por período.
-* Produtos com estoque baixo.
-* Promoções mais utilizadas.
-
-### Endpoints:
-
-```
-GET /reports/sales
-GET /reports/top-products
-GET /reports/low-stock
-```
-
----
-
-# ✅ 9. Novas Entidades Sugeridas
-
-```text
-Product
-- id
-- name
-- description
-- sku
-- price
-- costPrice
-- categoryId
-- stockQuantity
-- active
-- createdAt
-- updatedAt
-
-Category
-- id
-- name
-- parentId
-- createdAt
-- updatedAt
-
-InventoryTransaction
-- id
-- productId
-- delta
-- reason
-- referenceId
-- createdBy
-- createdAt
-
-Cart
-- id
-- userId
-- status
-
-CartItem
-- id
-- cartId
-- productId
-- quantity
-- priceSnapshot
-
-Order
-- id
-- userId
-- total
-- discount
-- freight
-- status
-- createdAt
-- address
-
-OrderItem
-- id
-- orderId
-- productId
-- quantity
-- priceSnapshot
-
-Promotion
-- id
-- code
-- type
-- value
-- validFrom
-- validTo
-- usageLimit
-- usedCount
-- applicableTo
-
-Review
-- id
-- productId
-- userId
-- rating
-- comment
-- createdAt
-
-AuditLog
-- id
-- entityType
-- entityId
-- action
-- beforeJson
-- afterJson
-- who
-- when
-```
-
----
-
-# ✅ 10. Tarefas / Exercícios Práticos para os Alunos
-
-## 🟦 **Básico (1–2 horas)**
-
-* Criar entidade Categoria.
-* Associar Produto → Categoria.
-* Implementar busca de produtos por nome/categoria.
-* Validar dados básicos (preço > 0, nome obrigatório).
-
-## 🟩 **Intermediário (4–8 horas)**
-
-* Criar carrinho de compras.
-* Controlar estoque com `InventoryTransaction`.
-
-## 🟧 **Avançado (8–20 horas)**
-
-* Finalizar fluxo completo de pedidos.
-* Criar sistema de cupons e promoções.
-* Implementar reviews vinculados ao pedido.
-* Criar testes unitários e de integração.
-
-## 🟥 **Desafios bônus**
-
-* Multi-seller (cada vendedor gerencia seus produtos).
-* Notificações (e-mail ou webhook) ao mudar status do pedido.
-* Agendamento (Scheduler) para alertas de estoque baixo.
-
----
-
-
-# Contatos
-
-* fabreum.dev@gmail.com
-* fabreum@minsait.com
-* linkedin.com/in/fabreum
