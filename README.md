@@ -1,7 +1,7 @@
 
 # E-Commerce API | Treinamento Java & Oracle | Minsait
 
-Este projeto é uma API REST robusta desenvolvida para o gerenciamento de um e-commerce, focada em boas práticas de desenvolvimento, persistência em banco de dados relacional e arquitetura escalável.
+Este projeto é um desenvolvido para o gerenciamento de um e-commerce, focada em boas práticas de desenvolvimento, persistência em banco de dados relacional e arquitetura escalável.
 
 ## 🚀 O que o sistema faz atualmente?
 Com base na nossa documentação interativa (Swagger), o sistema permite:
