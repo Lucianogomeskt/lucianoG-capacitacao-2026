@@ -45,7 +45,7 @@ public class EstoqueController {
             @ApiResponse(responseCode = "404", description = "Produto não encontrado no sistema"),
             @ApiResponse(responseCode = "500", description = "Erro interno no servidor")
     })
-    @PatchMapping("/ajustar/{id}")
+    @PutMapping("/ajustar/{id}")
     public ResponseEntity<Void> ajustar(@PathVariable Long id, @RequestParam int delta) {
         estoqueService.ajustarEstoque(id, delta);
         return ResponseEntity.ok().build();
