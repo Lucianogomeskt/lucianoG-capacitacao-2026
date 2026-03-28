@@ -1,6 +1,8 @@
 package br.com.indra.jp_capacitacao_2026.service;
 
 import br.com.indra.jp_capacitacao_2026.enums.StatusCarrinho;
+import br.com.indra.jp_capacitacao_2026.exception.CarrinhoNaoEncontrado;
+import br.com.indra.jp_capacitacao_2026.exception.ProdutoNaoEncontradoException;
 import br.com.indra.jp_capacitacao_2026.model.Carrinho;
 import br.com.indra.jp_capacitacao_2026.repository.CarrinhoItemRepository;
 import br.com.indra.jp_capacitacao_2026.repository.CarrinhoRepository;
@@ -38,7 +40,7 @@ public class CarrinhoService {
     @Transactional(readOnly = true)
     public CarrinhoResponseDTO verCarrinho(Long usuarioId) {
         Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndStatus(usuarioId, StatusCarrinho.ATIVO)
-                .orElseThrow(() -> new RuntimeException("Carrinho não encontrado para o usuário: " + usuarioId));
+                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho não encontrado para o usuário: " + usuarioId));
 
         return converterParaDTO(carrinho);
     }
@@ -46,7 +48,7 @@ public class CarrinhoService {
     @Transactional
     public void removerItem(Long carrinhoItemId) {
         if (!carrinhoItemRepository.existsById(carrinhoItemId)) {
-            throw new RuntimeException("Item não encontrado no carrinho: " + carrinhoItemId);
+            throw new ProdutoNaoEncontradoException("Item não encontrado no carrinho: " + carrinhoItemId);
         }
         carrinhoItemRepository.deleteById(carrinhoItemId);
     }
@@ -54,7 +56,7 @@ public class CarrinhoService {
     @Transactional
     public void esvaziarCarrinho(Long usuarioId) {
         Carrinho carrinho = carrinhoRepository.findByUsuarioIdAndStatus(usuarioId, StatusCarrinho.ATIVO)
-                .orElseThrow(() -> new RuntimeException("Carrinho ativo não encontrado para esvaziar."));
+                .orElseThrow(() -> new CarrinhoNaoEncontrado("Carrinho ativo não encontrado para esvaziar."));
         carrinho.getItens().clear();
         carrinhoRepository.save(carrinho);
     }
